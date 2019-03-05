@@ -1,6 +1,5 @@
 let canvas, ctx;
 let timeStart, timeEnd, totalTime;
-let timeAllow = 20;
 let isRestart = false;
 let bgReady, heroReady, monsterReady;
 let bgImage, heroImage, monsterImage;
@@ -19,12 +18,18 @@ document.body.appendChild(canvas);
 let heroX = canvas.width / 2;
 let heroY = canvas.height / 2;
 
+const secondsPerRound = 20;
+const startTime = Date.now();
+let timeRemaining = secondsPerRound;
+
+
 function loadImages() {
   bgImage = new Image();
   bgImage.onload = function() {
     bgReady = true;
   };
-  bgImage.src = "images/background.png";
+  bgImage.src = "images/beachBackground.jpg";
+
 
   heroImage = new Image();
   heroImage.onload = function() {
@@ -101,9 +106,11 @@ const update = () => {
     monsterY = y;
   }
 
-  if (countMonsterCaught > 3) {
-    gameOver();
-  }
+  // if (countMonsterCaught > 3) {
+  //   gameOver();
+  // }
+  let timeElapsed = Date.now() - startTime;
+  timeRemaining = Math.floor(secondsPerRound - timeElapsed/1000);
 };
 
 const notExceedCanvasBoundary = (characterX, characterY) => {
@@ -123,11 +130,10 @@ const resetGlobalVariable = () => {
 };
 
 const gameOver = () => {
-  //Reset Location of Hero
   resetGlobalVariable();
   ctx.textAlign = "center";
   ctx.fillText(
-    `You Win. Congratulations. Restart (Y/N)`,
+    `You Win. Congrats. Restart (Y/N)`,
     canvas.width / 2,
     canvas.height / 2
   );
@@ -139,7 +145,7 @@ const gameOver = () => {
 
 const render = function() {
   if (bgReady) {
-    ctx.drawImage(bgImage, 0, 0);
+    ctx.drawImage(bgImage, 0, 0, 500, 500);
   }
   if (heroReady) {
     ctx.drawImage(heroImage, heroX, heroY);
@@ -148,9 +154,10 @@ const render = function() {
     ctx.drawImage(monsterImage, monsterX, monsterY);
   }
 
-  ctx.font = "15px Arial";
-  ctx.fillText(`heroX: ${heroX} - heroY: ${heroY}`, 50, 100);
-  ctx.fillText(`monsterX: ${monsterX} - monsterY: ${monsterY}`, 100, 200);
+  //FOR DEBUG
+  // ctx.font = "15px Arial";
+  // ctx.fillText(`heroX: ${heroX} - heroY: ${heroY}`, 50, 100);
+  // ctx.fillText(`monsterX: ${monsterX} - monsterY: ${monsterY}`, 100, 200);
 
   //Display Count of Monster Caught
   ctx.font = "30px Arial";
@@ -158,12 +165,24 @@ const render = function() {
   ctx.fillText(`Score: ${countMonsterCaught}`, 20, 40);
 
   //Display Timer
-  ctx.fillText(`Timer: ${timeAllow}`, 360, 40);
+  ctx.fillText(`Timer: ${timeRemaining}`, 200, 40);
 };
+
+// const timer = timeLeft => {
+//   window.setInterval(() => {
+//     timeLeft -= 1;
+//     if (timeLeft <= 0) {
+//       clearInterval(timer);
+//     }
+//   }, 1000);
+//   return timeLeft;
+// };
+
 
 //The main game loop.
 //update + render
-let main = function() {
+
+const main = function() {
   update();
   render();
   if (countMonsterCaught > 2) {
@@ -173,7 +192,7 @@ let main = function() {
   }
 };
 
-var w = window;
+let w = window;
 requestAnimationFrame =
   w.requestAnimationFrame ||
   w.webkitRequestAnimationFrame ||
