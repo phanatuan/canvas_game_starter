@@ -3,7 +3,6 @@ Here, we create and add our "canvas" to the page.
 We also load all of our images. 
 */
 
-
 let canvas;
 let ctx;
 
@@ -18,20 +17,21 @@ let bgImage, heroImage, monsterImage;
 
 function loadImages() {
   bgImage = new Image();
-  bgImage.onload = function () {
+  bgImage.onload = function() {
     // show the background image
     bgReady = true;
   };
   bgImage.src = "images/background.png";
+
   heroImage = new Image();
-  heroImage.onload = function () {
+  heroImage.onload = function() {
     // show the hero image
     heroReady = true;
   };
   heroImage.src = "images/hero.png";
 
   monsterImage = new Image();
-  monsterImage.onload = function () {
+  monsterImage.onload = function() {
     // show the monster image
     monsterReady = true;
   };
@@ -41,64 +41,86 @@ function loadImages() {
 let heroX = canvas.width / 2;
 let heroY = canvas.height / 2;
 
-generateLocation = (canvas) => { 
-  let x = Math.random() * (canvas.width) + 1; 
-  let y = Math.random() * (canvas.height) + 1;
-  return {x, y}
-}
+generateLocation = canvas => {
+  let x = Math.random() * canvas.width + 1;
+  let y = Math.random() * canvas.height + 1;
+  return { x, y };
+};
 
 let monsterX = 100;
 let monsterY = 100;
 let countMonsterCaught = 0;
 
-
-
 // Keyboard Listeners
 
 let keysDown = {};
 function setupKeyboardListeners() {
-  addEventListener("keydown", function (key) {
-    keysDown[key.keyCode] = true;
-  }, false);
+  addEventListener(
+    "keydown",
+    function(key) {
+      keysDown[key.keyCode] = true;
+    },
+    false
+  );
 
-  addEventListener("keyup", function (key) {
-    delete keysDown[key.keyCode];
-  }, false);
+  addEventListener(
+    "keyup",
+    function(key) {
+      delete keysDown[key.keyCode];
+    },
+    false
+  );
 }
 
 const update = () => {
-  if (38 in keysDown) { // Player is holding up key
+  if (38 in keysDown) {
+    //UP
     heroY -= 2;
   }
-  if (40 in keysDown) { // Player is holding down key
+  if (40 in keysDown) {
+    //DOWN
     heroY += 2;
   }
-  if (37 in keysDown) { // Player is holding left key
+  if (37 in keysDown) {
+    //LEFT
     heroX -= 2;
   }
-  if (39 in keysDown) { // Player is holding right key
+  if (39 in keysDown) {
+    //RIGHT
     heroX += 2;
   }
 
-  // Check if player and monster collided. Our images
-  // are about 32 pixels big.
+  // Check if player and monster collided
   if (
-    heroX <= (monsterX + 32)
-    && monsterX <= (heroX + 32)
-    && heroY <= (monsterY + 32)
-    && monsterY <= (heroY + 32)
+    heroX <= monsterX + 32 &&
+    monsterX <= heroX + 32 &&
+    heroY <= monsterY + 32 &&
+    monsterY <= heroY + 32
   ) {
     // Pick a new location for the monster.
     // Note: Change this to place the monster at a new, random location.
-countMonsterCaught++;
-    document.getElementById('score').innerHTML = countMonsterCaught;
-    let { x, y } = generateLocation(canvas); // destructuring
-    monsterX = x; 
-    monsterY = y;
+    if (countMonsterCaught >= 5) {
+      gameOver();
+    } else {
+      countMonsterCaught++;
+      let { x, y } = generateLocation(canvas); // destructuring
+      monsterX = x; //generate new location for Monster
+      monsterY = y;
+    }
+
+    document.getElementById("score").innerHTML = countMonsterCaught;
   }
 };
 
-var render = function () {
+const gameOver = () => {
+  heroX = canvas.width / 2;
+  heroY = canvas.height / 2;
+  startGame();
+  document.getElementById("score").innerHTML = countMonsterCaught;
+  countMonsterCaught = 0;
+};
+
+const render = function() {
   if (bgReady) {
     ctx.drawImage(bgImage, 0, 0);
   }
@@ -111,23 +133,31 @@ var render = function () {
 };
 
 /**
- * The main game loop. Most every game will have two distinct parts:
+ * The main game loop.
  * update (updates the state of the game, in this case our hero and monster)
  * render (based on the state of our game, draw the right things)
  */
-var main = function () {
-  update(); 
-  render();
-  requestAnimationFrame(main);  // Request to do this again ASAP.
 
+var main = function() {
+  update();
+  render();
+  requestAnimationFrame(main); // Request to do this again ASAP.
 };
 
 // Cross-browser support for requestAnimationFrame.
 // Safely ignore this line. It's mostly here for people with old web browsers.
 var w = window;
-requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame || w.mozRequestAnimationFrame;
+requestAnimationFrame =
+  w.requestAnimationFrame ||
+  w.webkitRequestAnimationFrame ||
+  w.msRequestAnimationFrame ||
+  w.mozRequestAnimationFrame;
 
 // Let's play this game!
-loadImages();
-setupKeyboardListeners();
-main();
+const startGame = () => {
+  loadImages();
+  setupKeyboardListeners();
+  main();
+};
+
+startGame();
