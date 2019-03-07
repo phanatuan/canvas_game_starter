@@ -1,15 +1,3 @@
-/*
-  Code modified from:
-  http://www.lostdecadegames.com/how-to-make-a-simple-html5-canvas-game/
-  using graphics purchased from vectorstock.com
-*/
-
-/* Initialization.
-Here, we create and add our "canvas" to the page.
-We also load all of our images. 
-*/
-
-
 let canvas;
 let ctx;
 
@@ -44,28 +32,17 @@ function loadImages() {
   monsterImage.src = "images/monster.png";
 }
 
-/** 
- * Setting up our characters.
- * 
- * Note that heroX represents the X position of our hero.
- * heroY represents the Y position.
- * We'll need these values to know where to "draw" the hero.
- * 
- * The same applies to the monster.
- */
-
 let heroX = canvas.width / 2;
 let heroY = canvas.height / 2;
 
 let monsterX = 100;
 let monsterY = 100;
+let countMonsterCaught = 0;
 
-/** 
- * Keyboard Listeners
- * You can safely ignore this part, for now. 
- * 
- * This is just to let JavaScript know when the user has pressed a key.
-*/
+
+
+// Keyboard Listeners
+
 let keysDown = {};
 function setupKeyboardListeners() {
   // Check for keys pressed where key represents the keycode captured
@@ -79,13 +56,6 @@ function setupKeyboardListeners() {
   }, false);
 }
 
-
-/**
- *  Update game objects - change player position based on key pressed
- *  and check to see if the monster has been caught!
- *  
- *  If you change the value of 5, the player will move at a different rate.
- */
 let update = function () {
   if (38 in keysDown) { // Player is holding up key
     heroY -= 5;
@@ -110,6 +80,8 @@ let update = function () {
   ) {
     // Pick a new location for the monster.
     // Note: Change this to place the monster at a new, random location.
+    countMonsterCaught++;
+    document.getElementById('score').innerHTML = countMonsterCaught;
     monsterX = monsterX + 50;
     monsterY = monsterY + 70;
   }
