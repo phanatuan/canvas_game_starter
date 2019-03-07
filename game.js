@@ -1,6 +1,7 @@
 let canvas, ctx;
 let timeStart, timeEnd, totalTime;
 let timeAllow = 20;
+let isRestart = false; 
 
 canvas = document.createElement("canvas");
 ctx = canvas.getContext("2d");
@@ -90,24 +91,25 @@ const update = () => {
     heroY <= monsterY + 32 &&
     monsterY <= heroY + 32
   ) {
-    // Pick a new location for the monster.
-      countMonsterCaught++;
-      let { x, y } = generateLocation(canvas); // destructuring
-      monsterX = x; //generate new location for Monster
-      monsterY = y;
-    }
+    countMonsterCaught++;
+    let { x, y } = generateLocation(canvas); // destructuring
+    monsterX = x; //generate new location for Monster
+    monsterY = y;
+  }
 };
 
 const gameOver = () => {
+  //Reset Location of Hero
   heroX = canvas.width / 2;
   heroY = canvas.height / 2;
-  ctx.textAlign = "center"; 
-    ctx.fillText(
-      `You Win. Congratulations`,
-      canvas.width / 2,
-      canvas.height / 2
-    );
+  ctx.textAlign = "center";
+  ctx.fillText(`You Win. Congratulations. Restart (Y/N)`, canvas.width / 2, canvas.height / 2);
   countMonsterCaught = 0;
+  if (isRestart) { 
+    gameStart();
+  } else { 
+    return;
+  }
 };
 
 const render = function() {
@@ -120,30 +122,26 @@ const render = function() {
   if (monsterReady) {
     ctx.drawImage(monsterImage, monsterX, monsterY);
   }
-  
+
   //Display Count of Monster Caught
   ctx.font = "30px Arial";
   ctx.fillStyle = "red";
   ctx.fillText(`Score: ${countMonsterCaught}`, 20, 40);
 
   //Display Timer
-    ctx.fillText(`Timer: ${timeAllow}`, 360, 40);
-    // timeAllow = timeAllow -1 
-
-    if (countMonsterCaught > 3) {
-    timeEnd = performance.now();
-    totalTime = timeEnd - timeStart;
-    gameOver();
-  }
+  ctx.fillText(`Timer: ${timeAllow}`, 360, 40);
 };
-
 
 //The main game loop.
 //update + render
 let main = function() {
-  update(); 
+  update();
   render();
-  requestAnimationFrame(main); // Request to do this again ASAP.
+  if (countMonsterCaught > 2) { 
+    gameOver();
+  } else { 
+    requestAnimationFrame(main); // Request to do this again ASAP.
+  }
 };
 
 var w = window;
@@ -154,6 +152,11 @@ requestAnimationFrame =
   w.mozRequestAnimationFrame;
 
 // Let's play this game!
-loadImages();
-setupKeyboardListeners();
-main();
+gameStart = () => { 
+  loadImages();
+  setupKeyboardListeners();
+  main();
+}
+
+gameStart();
+
