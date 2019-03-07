@@ -1,8 +1,5 @@
-let canvas;
-let ctx;
-let timeStart;
-let timeEnd;
-let totalTime;
+let canvas, ctx;
+let timeStart, timeEnd, totalTime;
 
 canvas = document.createElement("canvas");
 ctx = canvas.getContext("2d");
@@ -16,21 +13,18 @@ let bgImage, heroImage, monsterImage;
 function loadImages() {
   bgImage = new Image();
   bgImage.onload = function() {
-    // show the background image
     bgReady = true;
   };
   bgImage.src = "images/background.png";
 
   heroImage = new Image();
   heroImage.onload = function() {
-    // show the hero image
     heroReady = true;
   };
   heroImage.src = "images/hero.png";
 
   monsterImage = new Image();
   monsterImage.onload = function() {
-    // show the monster image
     monsterReady = true;
   };
   monsterImage.src = "images/monster.png";
@@ -50,7 +44,6 @@ let monsterY = 100;
 let countMonsterCaught = 0;
 
 // Keyboard Listeners
-
 let keysDown = {};
 function setupKeyboardListeners() {
   addEventListener(
@@ -99,11 +92,11 @@ const update = () => {
     heroY <= monsterY + 32 &&
     monsterY <= heroY + 32
   ) {
+    ctx.strokeText("Monster Caught:", 100, 300);
     // Pick a new location for the monster.
-    if (countMonsterCaught >= 3) {
+    if (countMonsterCaught > 3) {
       timeEnd = performance.now();
       totalTime = timeEnd - timeStart;
-      console.log(`Total Time ${totalTime}`);
       gameOver();
     } else {
       countMonsterCaught++;
@@ -111,18 +104,15 @@ const update = () => {
       monsterX = x; //generate new location for Monster
       monsterY = y;
     }
-    if (totalTime) {
-      document.getElementById("timer").innerHTML = `${(totalTime/1000).toFixed(2)} seconds`;
-    }
-    document.getElementById("score").innerHTML = countMonsterCaught;
   }
 };
 
 const gameOver = () => {
   heroX = canvas.width / 2;
   heroY = canvas.height / 2;
-  startGame();
-  document.getElementById("score").innerHTML = countMonsterCaught;
+  ctx.font = "30px Arial";
+  ctx.fillStyle = "red";
+  ctx.fillText(`Game Over`, canvas.width / 2, canvas.length / 2);
   countMonsterCaught = 0;
 };
 
@@ -136,11 +126,26 @@ const render = function() {
   if (monsterReady) {
     ctx.drawImage(monsterImage, monsterX, monsterY);
   }
+
+  //Display Count of Monster Caught
+  ctx.font = "30px Arial";
+  ctx.fillStyle = "red";
+  ctx.fillText(`Score: ${countMonsterCaught}`, 20, 20);
+  
+  if (countMonsterCaught > 1) {
+    ctx.fillText(
+      `You Win. Congratulations`,
+      cavas.width / 2,
+      canvas.height / 2
+    );
+  }
+  // if (totalTime > 0) {
+  // ctx.fillText(`${(totalTime / 1000).toFixed(2)} seconds`, 300, 20);
+  // }
 };
 
-/**
- * The main game loop.
- * update + render */
+//The main game loop.
+//update + render
 
 let main = function() {
   update();
@@ -165,3 +170,5 @@ const startGame = () => {
 };
 
 startGame();
+
+
