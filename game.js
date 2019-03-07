@@ -1,5 +1,6 @@
 let canvas, ctx;
 let timeStart, timeEnd, totalTime;
+let timeAllow = 20;
 
 canvas = document.createElement("canvas");
 ctx = canvas.getContext("2d");
@@ -29,21 +30,6 @@ function loadImages() {
   };
   monsterImage.src = "images/monster.png";
 }
-
-let heroX = canvas.width / 2;
-let heroY = canvas.height / 2;
-
-generateLocation = canvas => {
-  let x = Math.random() * canvas.width + 1;
-  let y = Math.random() * canvas.height + 1;
-  return { x, y };
-};
-
-let monsterX = 100;
-let monsterY = 100;
-let countMonsterCaught = 0;
-
-// Keyboard Listeners
 let keysDown = {};
 function setupKeyboardListeners() {
   addEventListener(
@@ -67,6 +53,19 @@ function setupKeyboardListeners() {
   );
 }
 
+let heroX = canvas.width / 2;
+let heroY = canvas.height / 2;
+
+generateLocation = canvas => {
+  let x = Math.random() * canvas.width + 1;
+  let y = Math.random() * canvas.height + 1;
+  return { x, y };
+};
+
+let monsterX = 100;
+let monsterY = 100;
+let countMonsterCaught = 0;
+
 const update = () => {
   if (38 in keysDown) {
     //UP
@@ -85,34 +84,29 @@ const update = () => {
     heroX += 2;
   }
 
-  // Check if player and monster collided
   if (
     heroX <= monsterX + 32 &&
     monsterX <= heroX + 32 &&
     heroY <= monsterY + 32 &&
     monsterY <= heroY + 32
   ) {
-    ctx.strokeText("Monster Caught:", 100, 300);
     // Pick a new location for the monster.
-    if (countMonsterCaught > 3) {
-      timeEnd = performance.now();
-      totalTime = timeEnd - timeStart;
-      gameOver();
-    } else {
       countMonsterCaught++;
       let { x, y } = generateLocation(canvas); // destructuring
       monsterX = x; //generate new location for Monster
       monsterY = y;
     }
-  }
 };
 
 const gameOver = () => {
   heroX = canvas.width / 2;
   heroY = canvas.height / 2;
-  ctx.font = "30px Arial";
-  ctx.fillStyle = "red";
-  ctx.fillText(`Game Over`, canvas.width / 2, canvas.length / 2);
+  ctx.textAlign = "center"; 
+    ctx.fillText(
+      `You Win. Congratulations`,
+      canvas.width / 2,
+      canvas.height / 2
+    );
   countMonsterCaught = 0;
 };
 
@@ -126,35 +120,32 @@ const render = function() {
   if (monsterReady) {
     ctx.drawImage(monsterImage, monsterX, monsterY);
   }
-
+  
   //Display Count of Monster Caught
   ctx.font = "30px Arial";
   ctx.fillStyle = "red";
-  ctx.fillText(`Score: ${countMonsterCaught}`, 20, 20);
-  
-  if (countMonsterCaught > 1) {
-    ctx.fillText(
-      `You Win. Congratulations`,
-      cavas.width / 2,
-      canvas.height / 2
-    );
+  ctx.fillText(`Score: ${countMonsterCaught}`, 20, 40);
+
+  //Display Timer
+    ctx.fillText(`Timer: ${timeAllow}`, 360, 40);
+    // timeAllow = timeAllow -1 
+
+    if (countMonsterCaught > 3) {
+    timeEnd = performance.now();
+    totalTime = timeEnd - timeStart;
+    gameOver();
   }
-  // if (totalTime > 0) {
-  // ctx.fillText(`${(totalTime / 1000).toFixed(2)} seconds`, 300, 20);
-  // }
 };
+
 
 //The main game loop.
 //update + render
-
 let main = function() {
-  update();
+  update(); 
   render();
   requestAnimationFrame(main); // Request to do this again ASAP.
 };
 
-// Cross-browser support for requestAnimationFrame.
-// Safely ignore this line. It's mostly here for people with old web browsers.
 var w = window;
 requestAnimationFrame =
   w.requestAnimationFrame ||
@@ -163,12 +154,6 @@ requestAnimationFrame =
   w.mozRequestAnimationFrame;
 
 // Let's play this game!
-const startGame = () => {
-  loadImages();
-  setupKeyboardListeners();
-  main();
-};
-
-startGame();
-
-
+loadImages();
+setupKeyboardListeners();
+main();
