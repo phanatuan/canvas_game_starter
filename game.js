@@ -1,10 +1,8 @@
-/* Initialization.
-Here, we create and add our "canvas" to the page.
-We also load all of our images. 
-*/
-
 let canvas;
 let ctx;
+let timeStart;
+let timeEnd;
+let totalTime;
 
 canvas = document.createElement("canvas");
 ctx = canvas.getContext("2d");
@@ -58,6 +56,10 @@ function setupKeyboardListeners() {
   addEventListener(
     "keydown",
     function(key) {
+      if (!timeStart) {
+        timeStart = performance.now();
+        console.log(timeStart);
+      }
       keysDown[key.keyCode] = true;
     },
     false
@@ -98,8 +100,10 @@ const update = () => {
     monsterY <= heroY + 32
   ) {
     // Pick a new location for the monster.
-    // Note: Change this to place the monster at a new, random location.
-    if (countMonsterCaught >= 5) {
+    if (countMonsterCaught >= 3) {
+      timeEnd = performance.now();
+      totalTime = timeEnd - timeStart;
+      console.log(`Total Time ${totalTime}`);
       gameOver();
     } else {
       countMonsterCaught++;
@@ -107,7 +111,9 @@ const update = () => {
       monsterX = x; //generate new location for Monster
       monsterY = y;
     }
-
+    if (totalTime) {
+      document.getElementById("timer").innerHTML = `${(totalTime/1000).toFixed(2)} seconds`;
+    }
     document.getElementById("score").innerHTML = countMonsterCaught;
   }
 };
@@ -134,11 +140,9 @@ const render = function() {
 
 /**
  * The main game loop.
- * update (updates the state of the game, in this case our hero and monster)
- * render (based on the state of our game, draw the right things)
- */
+ * update + render */
 
-var main = function() {
+let main = function() {
   update();
   render();
   requestAnimationFrame(main); // Request to do this again ASAP.
