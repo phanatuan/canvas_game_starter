@@ -1,9 +1,3 @@
-/*
-  Code modified from:
-  http://www.lostdecadegames.com/how-to-make-a-simple-html5-canvas-game/
-  using graphics purchased from vectorstock.com
-*/
-
 /* Initialization.
 Here, we create and add our "canvas" to the page.
 We also load all of our images. 
@@ -57,19 +51,17 @@ function loadImages() {
 let heroX = canvas.width / 2;
 let heroY = canvas.height / 2;
 
+generateLocation = (canvas) => { 
+  let x = Math.random() * (canvas.width) + 1; 
+  let y = Math.random() * (canvas.height) + 1;
+  return {x, y}
+}
+
 let monsterX = 100;
 let monsterY = 100;
 
-/** 
- * Keyboard Listeners
- * You can safely ignore this part, for now. 
- * 
- * This is just to let JavaScript know when the user has pressed a key.
-*/
 let keysDown = {};
 function setupKeyboardListeners() {
-  // Check for keys pressed where key represents the keycode captured
-  // For now, do not worry too much about what's happening here. 
   addEventListener("keydown", function (key) {
     keysDown[key.keyCode] = true;
   }, false);
@@ -79,25 +71,18 @@ function setupKeyboardListeners() {
   }, false);
 }
 
-
-/**
- *  Update game objects - change player position based on key pressed
- *  and check to see if the monster has been caught!
- *  
- *  If you change the value of 5, the player will move at a different rate.
- */
-let update = function () {
+const update = () => {
   if (38 in keysDown) { // Player is holding up key
-    heroY -= 5;
+    heroY -= 2;
   }
   if (40 in keysDown) { // Player is holding down key
-    heroY += 5;
+    heroY += 2;
   }
   if (37 in keysDown) { // Player is holding left key
-    heroX -= 5;
+    heroX -= 2;
   }
   if (39 in keysDown) { // Player is holding right key
-    heroX += 5;
+    heroX += 2;
   }
 
   // Check if player and monster collided. Our images
@@ -110,8 +95,9 @@ let update = function () {
   ) {
     // Pick a new location for the monster.
     // Note: Change this to place the monster at a new, random location.
-    monsterX = monsterX + 50;
-    monsterY = monsterY + 70;
+    let { x, y } = generateLocation(canvas); // destructuring
+    monsterX = x; 
+    monsterY = y;
   }
 };
 
@@ -138,9 +124,8 @@ var render = function () {
 var main = function () {
   update(); 
   render();
-  // Request to do this again ASAP. This is a special method
-  // for web browsers. 
-  requestAnimationFrame(main);
+  requestAnimationFrame(main);  // Request to do this again ASAP.
+
 };
 
 // Cross-browser support for requestAnimationFrame.
