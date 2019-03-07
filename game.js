@@ -98,9 +98,6 @@ countMonsterCaught++;
   }
 };
 
-/**
- * This function, render, runs as often as possible.
- */
 var render = function () {
   if (bgReady) {
     ctx.drawImage(bgImage, 0, 0);
