@@ -1,16 +1,23 @@
 let canvas, ctx;
 let timeStart, timeEnd, totalTime;
 let timeAllow = 20;
-let isRestart = false; 
+let isRestart = false;
+let bgReady, heroReady, monsterReady;
+let bgImage, heroImage, monsterImage;
+
+let monsterX = 100;
+let monsterY = 100;
+let countMonsterCaught = 0;
+let keysDown = {};
 
 canvas = document.createElement("canvas");
 ctx = canvas.getContext("2d");
-canvas.width = 512;
-canvas.height = 480;
+canvas.width = 500;
+canvas.height = 500;
 document.body.appendChild(canvas);
 
-let bgReady, heroReady, monsterReady;
-let bgImage, heroImage, monsterImage;
+let heroX = canvas.width / 2;
+let heroY = canvas.height / 2;
 
 function loadImages() {
   bgImage = new Image();
@@ -31,7 +38,7 @@ function loadImages() {
   };
   monsterImage.src = "images/monster.png";
 }
-let keysDown = {};
+
 function setupKeyboardListeners() {
   addEventListener(
     "keydown",
@@ -54,18 +61,11 @@ function setupKeyboardListeners() {
   );
 }
 
-let heroX = canvas.width / 2;
-let heroY = canvas.height / 2;
-
-generateLocation = canvas => {
+const generateLocation = canvas => {
   let x = Math.random() * canvas.width + 1;
   let y = Math.random() * canvas.height + 1;
   return { x, y };
 };
-
-let monsterX = 100;
-let monsterY = 100;
-let countMonsterCaught = 0;
 
 const update = () => {
   if (38 in keysDown) {
@@ -85,6 +85,10 @@ const update = () => {
     heroX += 2;
   }
 
+  let { characterX, characterY } = notExceedCanvasBoundary(heroX, heroY);
+  heroX = characterX;
+  heroY = characterY;
+
   if (
     heroX <= monsterX + 32 &&
     monsterX <= heroX + 32 &&
@@ -96,20 +100,41 @@ const update = () => {
     monsterX = x; //generate new location for Monster
     monsterY = y;
   }
+
+  if (countMonsterCaught > 3) {
+    gameOver();
+  }
+};
+
+const notExceedCanvasBoundary = (characterX, characterY) => {
+  characterX = Math.min(characterX, canvas.width - 40);
+  characterX = Math.max(characterX, 0);
+  characterY = Math.min(characterY, canvas.height - 40);
+  characterY = Math.max(characterY, 0);
+  return { characterX, characterY };
+};
+
+const resetGlobalVariable = () => {
+  heroX = canvas.width / 2;
+  heroY = canvas.height / 2;
+  let { x, y } = generateLocation(canvas); // destructuring
+  monsterX = x; //generate new location for Monster
+  monsterY = y;
 };
 
 const gameOver = () => {
   //Reset Location of Hero
-  heroX = canvas.width / 2;
-  heroY = canvas.height / 2;
+  resetGlobalVariable();
   ctx.textAlign = "center";
-  ctx.fillText(`You Win. Congratulations. Restart (Y/N)`, canvas.width / 2, canvas.height / 2);
-  countMonsterCaught = 0;
-  if (isRestart) { 
-    gameStart();
-  } else { 
-    return;
+  ctx.fillText(
+    `You Win. Congratulations. Restart (Y/N)`,
+    canvas.width / 2,
+    canvas.height / 2
+  );
+  if (32 in keysDown) {
+    console.log("Push Y");
   }
+  countMonsterCaught = 0;
 };
 
 const render = function() {
@@ -122,6 +147,10 @@ const render = function() {
   if (monsterReady) {
     ctx.drawImage(monsterImage, monsterX, monsterY);
   }
+
+  ctx.font = "15px Arial";
+  ctx.fillText(`heroX: ${heroX} - heroY: ${heroY}`, 50, 100);
+  ctx.fillText(`monsterX: ${monsterX} - monsterY: ${monsterY}`, 100, 200);
 
   //Display Count of Monster Caught
   ctx.font = "30px Arial";
@@ -137,9 +166,9 @@ const render = function() {
 let main = function() {
   update();
   render();
-  if (countMonsterCaught > 2) { 
+  if (countMonsterCaught > 2) {
     gameOver();
-  } else { 
+  } else {
     requestAnimationFrame(main); // Request to do this again ASAP.
   }
 };
@@ -152,11 +181,10 @@ requestAnimationFrame =
   w.mozRequestAnimationFrame;
 
 // Let's play this game!
-gameStart = () => { 
+gameStart = () => {
   loadImages();
   setupKeyboardListeners();
   main();
-}
+};
 
 gameStart();
-
