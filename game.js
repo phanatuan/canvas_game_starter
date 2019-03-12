@@ -9,6 +9,9 @@ let monsterY = 100;
 let countMonsterCaught = 0;
 let keysDown = {};
 
+let xDirection = 1; 
+let yDirection = 1;
+
 canvas = document.createElement("canvas");
 ctx = canvas.getContext("2d");
 canvas.width = 500;
@@ -22,6 +25,20 @@ const secondsPerRound = 20;
 const startTime = Date.now();
 let timeRemaining = secondsPerRound;
 
+// let Character = class { 
+//   constructor(coordX, coordY, width, height) { 
+//     this.coordX = coordX,
+//     this.coordY = coordY, 
+//     this.width = width, 
+//     this.height = height
+//   }
+//   print() { 
+//     ctx.drawImage
+//   }  
+// };
+
+// heroTest = new Character(200,300, 2, 2) 
+
 
 function loadImages() {
   bgImage = new Image();
@@ -30,12 +47,11 @@ function loadImages() {
   };
   bgImage.src = "images/beachBackground.jpg";
 
-
-  heroImage = new Image();
-  heroImage.onload = function() {
-    heroReady = true;
-  };
-  heroImage.src = "images/hero.png";
+  // heroImage = new Image();
+  // heroImage.onload = function() {
+  //   heroReady = true;
+  // };
+  // heroImage.src = "images/hero.png";
 
   monsterImage = new Image();
   monsterImage.onload = function() {
@@ -72,6 +88,13 @@ const generateLocation = canvas => {
   return { x, y };
 };
 
+// const move = (x, y) => { 
+//   return { 
+//     x += 5; 
+//   y += 5;
+//   }
+// }
+
 const update = () => {
   if (38 in keysDown) {
     //UP
@@ -94,6 +117,27 @@ const update = () => {
   heroX = characterX;
   heroY = characterY;
 
+
+  
+
+  // move(monsterX, monsterY);
+  monsterX += 2 * xDirection; 
+  monsterY += 2 * yDirection;
+
+
+  // change Direction when reach canvas
+  if (monsterX > canvas.width-30 || monsterX <0 ) { 
+    xDirection = -xDirection; 
+  }
+
+  if (monsterY > canvas.height-30 || monsterY <0 ) { 
+    yDirection = -yDirection; 
+  }
+
+  console.log(monsterX, monsterY, xDirection, yDirection);  
+  
+
+
   if (
     heroX <= monsterX + 32 &&
     monsterX <= heroX + 32 &&
@@ -106,11 +150,8 @@ const update = () => {
     monsterY = y;
   }
 
-  // if (countMonsterCaught > 3) {
-  //   gameOver();
-  // }
   let timeElapsed = Date.now() - startTime;
-  timeRemaining = Math.floor(secondsPerRound - timeElapsed/1000);
+  timeRemaining = Math.floor(secondsPerRound - timeElapsed / 1000);
 };
 
 const notExceedCanvasBoundary = (characterX, characterY) => {
@@ -127,45 +168,51 @@ const resetGlobalVariable = () => {
   let { x, y } = generateLocation(canvas); // destructuring
   monsterX = x; //generate new location for Monster
   monsterY = y;
+  countMonsterCaught = 0;
 };
 
 const gameOver = () => {
   resetGlobalVariable();
+  ctx.beginPath();
   ctx.textAlign = "center";
   ctx.fillText(
     `You Win. Congrats. Restart (Y/N)`,
     canvas.width / 2,
     canvas.height / 2
   );
-  if (32 in keysDown) {
+  ctx.closePath();
+  if (40 in keysDown) {
     console.log("Push Y");
+    // gameStart();
   }
-  countMonsterCaught = 0;
 };
 
 const render = function() {
   if (bgReady) {
     ctx.drawImage(bgImage, 0, 0, 500, 500);
   }
-  if (heroReady) {
-    ctx.drawImage(heroImage, heroX, heroY);
-  }
+  // if (heroReady) {
+  //   ctx.drawImage(heroImage, heroX, heroY);
+  // }
   if (monsterReady) {
     ctx.drawImage(monsterImage, monsterX, monsterY);
   }
 
-  //FOR DEBUG
-  // ctx.font = "15px Arial";
-  // ctx.fillText(`heroX: ${heroX} - heroY: ${heroY}`, 50, 100);
-  // ctx.fillText(`monsterX: ${monsterX} - monsterY: ${monsterY}`, 100, 200);
-
   //Display Count of Monster Caught
+  ctx.beginPath();
   ctx.font = "30px Arial";
   ctx.fillStyle = "red";
   ctx.fillText(`Score: ${countMonsterCaught}`, 20, 40);
+  ctx.closePath();
 
   //Display Timer
+  ctx.beginPath();
   ctx.fillText(`Timer: ${timeRemaining}`, 200, 40);
+  ctx.closePath();
+
+  if (countMonsterCaught > 2) {
+    gameOver();
+  }
 };
 
 // const timer = timeLeft => {
@@ -178,18 +225,13 @@ const render = function() {
 //   return timeLeft;
 // };
 
-
-//The main game loop.
-//update + render
-
 const main = function() {
   update();
   render();
-  if (countMonsterCaught > 2) {
-    gameOver();
-  } else {
-    requestAnimationFrame(main); // Request to do this again ASAP.
-  }
+  // if (countMonsterCaught > 2) {
+  //   gameOver();
+  // }
+  requestAnimationFrame(main); // Request to do this again ASAP.
 };
 
 let w = window;
@@ -200,7 +242,7 @@ requestAnimationFrame =
   w.mozRequestAnimationFrame;
 
 // Let's play this game!
-gameStart = () => {
+const gameStart = () => {
   loadImages();
   setupKeyboardListeners();
   main();
